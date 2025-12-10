@@ -1,41 +1,61 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Address } from '@/app/types'
 import { useDebounce } from '../hooks/useDebounce'
 
 export function SearchBar() {
   const [addressSearch, setAddressSearch] = useState('')
-  const debouncedSearch = useDebounce(addressSearch, 40)
+  const [autocompletedValue, setAutocompletedValue] = useState('')
   const [results, setResults] = useState<Address[]>([])
   const [errorMessage, setErrorMessage] = useState('')
-
-  async function displayResults(searchValue: string) {
-    try {
-      setErrorMessage('')
-      const data = await getSearchResults(searchValue)
-      setResults(data)
-    } catch (error) {
-      setResults([])
-      setErrorMessage('Oops, we encountered an error.')
-    }
-  }
+  const debouncedSearch = useDebounce(addressSearch, 40)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (debouncedSearch.trim().length >= 3) {
-      displayResults(debouncedSearch.trim())
+    async function displayResults() {
+      try {
+        setErrorMessage('')
+        const data = await getSearchResults(debouncedSearch)
+        setResults(data)
+        console.log(`GET search/${debouncedSearch} returned`, data)
+      } catch (error) {
+        console.error('API error', error)
+        setResults([])
+        setErrorMessage('Oops, we encountered an error.')
+      }
+    }
+
+    if (debouncedSearch.length >= 3) {
+      displayResults()
     }
   }, [debouncedSearch])
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  function handleSelectOption(address: Address) {
+    console.log('Autocompleted:', debouncedSearch, address)
+    setAutocompletedValue(`${address.street} ${address.postNumber} ${address.city}`)
+    setAddressSearch('')
+    setResults([])
+  }
 
   return (
     <div className='w-full'>
       <input
+        ref={inputRef}
+        autoFocus
         type='search'
         placeholder='Enter address...'
-        className='border-b-1 border-b-gray-400 text-xl md:text-3xl w-full px-2'
-        value={addressSearch}
-        onChange={(e) => setAddressSearch(e.target.value)}
+        className='border-b-1 border-b-gray-400 text-xl md:text-2xl w-full px-2'
+        value={autocompletedValue || addressSearch}
+        onChange={(e) => {
+          setAutocompletedValue('')
+          setAddressSearch(e.target.value.trim())
+        }}
       />
-      <p className='text-xs text-red-400'>{errorMessage}</p>
+      <p className='text-xs text-red-400 mt-2'>{errorMessage}</p>
       <section className='mt-4'>
         <ul
           className={`origin-top transition-transform duration-300 max-h-[calc(100vh-13rem)] overflow-y-auto ${
@@ -44,10 +64,14 @@ export function SearchBar() {
           {results.map((address, i) => (
             <li
               key={i}
+              tabIndex={0}
               className='text-sm py-2 px-2 transition-all duration-100 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer opacity-70 hover:opacity-100 hover:font-bold '
-              onClick={() =>
-                setAddressSearch(`${address.street} ${address.postNumber} ${address.city}`)
-              }>
+              onClick={() => handleSelectOption(address)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSelectOption(address)
+                }
+              }}>
               <span className='font-medium'>{address.street}</span>{' '}
               <span className='font-light opacity-60'>
                 {address.postNumber} {address.city}
