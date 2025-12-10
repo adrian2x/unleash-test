@@ -3,27 +3,17 @@ import { useEffect, useState } from 'react'
 import { Address } from '@/app/types'
 import { useDebounce } from '../hooks/useDebounce'
 
-async function getSearchResults(searchValue: string): Promise<Address[]> {
-  const response = await fetch(`/api/search/${searchValue}`)
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error)
-  }
-  const results = await response.json()
-  return results as Address[]
-}
-
 export function SearchBar() {
   const [addressSearch, setAddressSearch] = useState('')
-  const debouncedSearch = useDebounce(addressSearch, 100)
+  const debouncedSearch = useDebounce(addressSearch, 40)
   const [results, setResults] = useState<Address[]>([])
   const [errorMessage, setErrorMessage] = useState('')
 
   async function displayResults(searchValue: string) {
     try {
+      setErrorMessage('')
       const data = await getSearchResults(searchValue)
       setResults(data)
-      setErrorMessage('')
     } catch (error) {
       setResults([])
       setErrorMessage('Oops, we encountered an error.')
@@ -31,8 +21,8 @@ export function SearchBar() {
   }
 
   useEffect(() => {
-    if (debouncedSearch.length >= 3) {
-      displayResults(debouncedSearch)
+    if (debouncedSearch.trim().length >= 3) {
+      displayResults(debouncedSearch.trim())
     }
   }, [debouncedSearch])
 
@@ -68,4 +58,14 @@ export function SearchBar() {
       </section>
     </div>
   )
+}
+
+async function getSearchResults(searchValue: string): Promise<Address[]> {
+  const response = await fetch(`/search/${searchValue}`)
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error)
+  }
+  const results = await response.json()
+  return results as Address[]
 }

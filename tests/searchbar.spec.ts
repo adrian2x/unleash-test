@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test('happy path: user searches and sees results', async ({ page }) => {
   // Intercept API request and mock it
-  await page.route('/api/search/Ale', async (route) => {
+  await page.route('/search/Ale', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

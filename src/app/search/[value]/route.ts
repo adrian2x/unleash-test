@@ -8,6 +8,7 @@ trie.addAll(addresses as Address[])
 
 export async function GET(req: NextRequest, context: { params: Promise<{ value: string }> }) {
   const { value } = await context.params
+  const lowerCaseValue = value.toLowerCase()
 
   // Validate the request parameters
   if (!value || value.length < 3)
@@ -18,6 +19,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ value: 
       { status: 400 }
     )
 
-  const results = trie.search(value, undefined, 20)
-  return NextResponse.json(results)
+  const results = trie.search(lowerCaseValue, (accumulator, phrase, matches) => {
+    return matches
+      .filter((x) => x.street.toLowerCase().startsWith(lowerCaseValue))
+      .sort((a, b) => {
+        return a.street.length - b.street.length
+      })
+  })
+  return NextResponse.json(results.slice(0, 20))
 }
