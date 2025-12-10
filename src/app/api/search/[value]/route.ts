@@ -19,5 +19,5 @@ export async function GET(req: NextRequest, context: { params: Promise<{ value: 
     )
 
   const results = trie.search(value, undefined, 20)
-  return NextResponse.json({ results })
+  return NextResponse.json(results)
 }

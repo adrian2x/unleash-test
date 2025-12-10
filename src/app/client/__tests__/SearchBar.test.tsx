@@ -11,32 +11,30 @@ beforeEach(() => {
 })
 
 test('renders search bar and loads results on successful API call', async () => {
-  const mockResults = {
-    results: [
-      {
-        postNumber: 175,
-        city: 'OSLO',
-        street: 'Alexander Kiellands plass',
-        typeCode: 6,
-        type: 'Gate-/veg-adresse',
-        district: 'Grünerløkka',
-        municipalityNumber: 301,
-        municipality: 'Oslo',
-        county: 'Oslo'
-      },
-      {
-        postNumber: 501,
-        city: 'OSLO',
-        street: 'Rodeløkka Postboks 6500-6599',
-        typeCode: 4,
-        type: 'Postboksadresse',
-        district: 'Grünerløkka',
-        municipalityNumber: 301,
-        municipality: 'Oslo',
-        county: 'Oslo'
-      }
-    ]
-  }
+  const mockResults = [
+    {
+      postNumber: 175,
+      city: 'OSLO',
+      street: 'Alexander Kiellands plass',
+      typeCode: 6,
+      type: 'Gate-/veg-adresse',
+      district: 'Grünerløkka',
+      municipalityNumber: 301,
+      municipality: 'Oslo',
+      county: 'Oslo'
+    },
+    {
+      postNumber: 501,
+      city: 'OSLO',
+      street: 'Rodeløkka Postboks 6500-6599',
+      typeCode: 4,
+      type: 'Postboksadresse',
+      district: 'Grünerløkka',
+      municipalityNumber: 301,
+      municipality: 'Oslo',
+      county: 'Oslo'
+    }
+  ]
 
   global.fetch.mockResolvedValueOnce({
     ok: true,

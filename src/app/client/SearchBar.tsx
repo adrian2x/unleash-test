@@ -9,8 +9,8 @@ async function getSearchResults(searchValue: string): Promise<Address[]> {
     const error = await response.json()
     throw new Error(error.error)
   }
-  const body = await response.json()
-  return body.results as Address[]
+  const results = await response.json()
+  return results as Address[]
 }
 
 export function SearchBar() {
@@ -39,6 +39,7 @@ export function SearchBar() {
   return (
     <div className='w-full'>
       <input
+        type='search'
         placeholder='Enter address...'
         className='border-b-1 border-b-gray-400 text-xl md:text-3xl w-full px-2'
         value={addressSearch}
