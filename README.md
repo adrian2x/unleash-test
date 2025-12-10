@@ -18,3 +18,14 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Tests
+To run the integration tests
+```
+npm test
+```
+
+For the End-to-End tests, run this instead
+```
+npx playwright test --ui
+```
