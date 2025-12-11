@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Address } from '@/app/types'
 import { useDebounce } from '../hooks/useDebounce'
+import { getSearchResults } from '../lib/requests'
 
 export function SearchBar() {
   const [addressSearch, setAddressSearch] = useState('')
@@ -11,13 +12,15 @@ export function SearchBar() {
   const debouncedSearch = useDebounce(addressSearch, 40)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const currentSearch = debouncedSearch.trim()
+
   useEffect(() => {
     async function displayResults() {
       try {
         setErrorMessage('')
-        const data = await getSearchResults(debouncedSearch)
+        const data = await getSearchResults(currentSearch)
         setResults(data)
-        console.log(`GET search/${debouncedSearch} returned`, data)
+        console.log(`GET search/${currentSearch} returned`, data)
       } catch (error) {
         console.error('API error', error)
         setResults([])
@@ -25,17 +28,17 @@ export function SearchBar() {
       }
     }
 
-    if (debouncedSearch.length >= 3) {
+    if (currentSearch.length >= 3) {
       displayResults()
     }
-  }, [debouncedSearch])
+  }, [currentSearch])
 
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
 
   function handleSelectOption(address: Address) {
-    console.log('Autocompleted:', debouncedSearch, address)
+    console.log('Autocompleted value:', address)
     setAutocompletedValue(`${address.street} ${address.postNumber} ${address.city}`)
     setAddressSearch('')
     setResults([])
@@ -48,18 +51,20 @@ export function SearchBar() {
         autoFocus
         type='search'
         placeholder='Enter address...'
-        className='border-b-1 border-b-gray-400 text-xl md:text-2xl w-full px-2'
+        className={`border-b-2 text-xl md:text-2xl w-full px-2 ${
+          autocompletedValue ? 'border-b-green-400' : 'border-b-gray-400'
+        }`}
         value={autocompletedValue || addressSearch}
         onChange={(e) => {
           setAutocompletedValue('')
-          setAddressSearch(e.target.value.trim())
+          setAddressSearch(e.target.value)
         }}
       />
       <p className='text-xs text-red-400 mt-2'>{errorMessage}</p>
       <section className='mt-4'>
         <ul
           className={`origin-top transition-transform duration-300 ${
-            addressSearch.length >= 3 ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+            currentSearch.length >= 3 ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
           }`}>
           {results.map((address, i) => (
             <li
@@ -78,18 +83,12 @@ export function SearchBar() {
               </span>
             </li>
           ))}
+          {!autocompletedValue &&
+            !errorMessage &&
+            currentSearch.length >= 3 &&
+            results.length == 0 && <li>No results</li>}
         </ul>
       </section>
     </div>
   )
-}
-
-async function getSearchResults(searchValue: string): Promise<Address[]> {
-  const response = await fetch(`/search/${searchValue}`)
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error)
-  }
-  const results = await response.json()
-  return results as Address[]
 }

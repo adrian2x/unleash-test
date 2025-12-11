@@ -1,4 +1,4 @@
-import { SearchBar } from './client/SearchBar'
+import { SearchBar } from './components/SearchBar'
 
 export default function Home() {
   return (

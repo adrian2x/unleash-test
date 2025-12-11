@@ -3,19 +3,14 @@ import addresses from '@/data/adresses.json'
 import { Address } from '@/app/types'
 
 type TrieNode = Address & { matchKey: string }
-let trie: TrieSearch<TrieNode> | null = null
+export const trie = new TrieSearch<TrieNode>(['matchKey'], { min: 3 })
+trie.addAll(
+  (addresses as Address[]).map((obj) => {
+    return { ...obj, matchKey: normalizeString(obj.street) }
+  })
+)
 
-export function getTrie() {
-  if (!trie) {
-    trie = new TrieSearch<TrieNode>(['matchKey'], { min: 3 })
-    trie.addAll(
-      (addresses as Address[]).map((obj) => {
-        return { ...obj, matchKey: normalizeString(obj.street) }
-      })
-    )
-  }
-  return trie
-}
+export default trie
 
 export function normalizeString(str: string) {
   return str
