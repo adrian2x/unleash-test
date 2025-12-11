@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import TrieSearch from 'trie-search'
-import addresses from '@/data/adresses.json'
-import { Address } from '@/app/types'
-
-const trie = new TrieSearch<Address>(['street'], { min: 3 })
-trie.addAll(addresses as Address[])
+import { getTrie } from '@/app/lib/trie'
 
 export async function GET(req: NextRequest, context: { params: Promise<{ value: string }> }) {
   const { value } = await context.params
@@ -22,7 +17,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ value: 
   }
 
   const normalizedSearch = normalizeLetters(lowerCaseValue)
-  const results = trie.search(lowerCaseValue, (accumulator, phrase, matches) => {
+  const results = getTrie().search(lowerCaseValue, (accumulator, phrase, matches) => {
     return matches
       .filter((x) => normalizeLetters(x.street.toLowerCase()).startsWith(normalizedSearch))
       .sort((a, b) => {

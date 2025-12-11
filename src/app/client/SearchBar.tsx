@@ -58,7 +58,7 @@ export function SearchBar() {
       <p className='text-xs text-red-400 mt-2'>{errorMessage}</p>
       <section className='mt-4'>
         <ul
-          className={`origin-top transition-transform duration-300 max-h-[calc(100vh-13rem)] overflow-y-auto ${
+          className={`origin-top transition-transform duration-300 ${
             addressSearch.length >= 3 ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
           }`}>
           {results.map((address, i) => (
